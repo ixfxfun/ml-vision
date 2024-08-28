@@ -1,0 +1,33 @@
+{
+  "name": "ml-vision",
+  "version": "0.0.3",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.15.4",
+    "@changesets/cli": "^2.27.7",
+    "@clinth/remote": "2.1.2",
+    "@mediapipe/tasks-vision": "0.10.14",
+    "ixfx": "0.29.1",
+    "lit": "3.2.0",
+    "rimraf": "6.0.1",
+    "tsup": "^8.2.4",
+    "typescript": "5.5.4"
+  },
+  "scripts": {
+    "build": "tsup",
+    "ci": "npm run build && npm run check-exports && npm run lint",
+    "lint": "tsc",
+    "format": "prettier --write .",
+    "check-exports": "attw --pack .",
+    "local-release": "npm run ci && changeset version && changeset publish",
+    "dev": "tsup --watch",
+    "copy:wasm": "copyfiles --up=4 ./node_modules/@mediapipe/tasks-vision/wasm/*.* ./wasm"
+  },
+  "dependencies": {
+    "copyfiles": "2.4.1"
+  }
+}

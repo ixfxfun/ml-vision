@@ -1,0 +1,41 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>test</title>
+    <style>
+     html,body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background-color: black;
+     }
+
+     #is {
+      height:100vh;
+      width:100vw;
+     }
+    </style>
+  </head>
+  <body>
+    <vision-element id="is"></vision-element>
+    <script type="module">
+      import { LitElement } from "https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js"
+      import { MlVision,  Client } from "./dist/index.js"
+      const ds = new MlVision(`#is`, {
+        verbosity:`debug`
+      });
+      
+      ds.init();
+
+      // const client = new Client();
+      // client.addEventListener(`message`, event => {
+      //   const { detail } = event;
+      //   console.log(detail);
+      // })
+    </script>
+  </body>
+</html>

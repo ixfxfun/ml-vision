@@ -1,0 +1,133 @@
+import { LitElement, html, css } from 'lit';
+import { customElement, property } from 'lit/decorators.js';
+import { afterMatch, snipBefore } from '../util/text.js';
+import type { RecordingData, Source } from '../types.js';
+import { createRef, type Ref, ref } from 'lit/directives/ref.js';
+
+@customElement('source-selector')
+export class SourceSelector extends LitElement {
+  static override styles = css`
+    :host {
+    }
+    #contents {
+      padding: 0.5rem;
+    }
+    input {
+      display: none;
+    }
+  `;
+
+  @property({ type: Object })
+  recordings: RecordingData[] = [];
+
+  @property()
+  expanded = false;
+
+  @property()
+  source: Source | undefined;
+  #mediaDisabled = false;
+  #fileInputEl: Ref<HTMLInputElement> = createRef();
+
+  getContents() {
+    const source = this.source;
+    let sel = ``;
+    if (source) {
+      if (source.kind === `camera`) {
+        const first = video[ 0 ];
+        if (source.id === `` && first) {
+          sel = first.id;
+        } else {
+          sel = `camera-${ source.id }`;
+        }
+      } else if (source.kind === `recording`) {
+        sel = `rec-${ source.id }`;
+      }
+    }
+    const cameras = video.length === 0 ? html`` : html`<optgroup label="Camera">
+          ${ video.map(d => html`<option ?selected=${ d.id === sel } value=${ d.id }>${ d.label }</option>`) }
+        </optgroup>`
+
+    const recordings = this.recordings.length === 0 ? html`` : html`<optgroup label="Recording">
+          ${ this.recordings.map(d => html`<option ?selected=${ d.name === sel } value="rec">${ d.name }</option>`) }
+        </optgroup>`
+
+    return html`
+      <div id="contents">
+      <input @change=${ this.onFileChange } ${ ref(this.#fileInputEl) } id="fileInput" type="file" accept="video/*" />
+      <select @change=${ this.onSelectChange }>
+        ${ cameras }
+        ${ recordings }
+        <optgroup label="File">
+          <option value="file">File</option>
+        </optgroup>
+      </select>
+    </div>
+    `;
+  }
+
+  override render() {
+    const contents = this.expanded ? this.getContents() : html``;
+    return html`
+    <div>
+      <button @click=${ this.onToggle }>Source</button>
+      ${ contents }
+    </div>
+    `;
+  }
+
+  onFileChange(event: Event) {
+    const target = event.target as HTMLInputElement;
+    if (!target) return;
+    if (!target.files) return;
+    const files = target.files;
+    if (files.length === 0) return;
+
+    const url = URL.createObjectURL(files[ 0 ] as unknown as MediaSource);
+    const s: Source = {
+      id: url,
+      kind: `file`
+    };
+
+    this.dispatchEvent(new CustomEvent(`change`, {
+      detail: s
+    }));
+    this.expanded = false;
+  }
+
+  onSelectChange(event: Event) {
+    const t = event.target as HTMLSelectElement;
+    const opt = t.item(t.selectedIndex);
+    if (!opt) return;
+    const value = opt.value;
+
+    if (value.startsWith(`camera-`)) {
+      this.source = {
+        kind: `camera`,
+        id: afterMatch(value, `camera-`)
+      }
+    } else if (value === `rec`) {
+      this.source = {
+        kind: `recording`,
+        id: opt.innerText
+      }
+    } else if (value === `file`) {
+      this.#fileInputEl.value?.click();
+    }
+    this.dispatchEvent(new CustomEvent(`change`, { detail: this.source }))
+
+    this.expanded = false;
+  }
+
+  onToggle() {
+    if (this.devices.length == 0) this.updateDevices();
+    this.expanded = !this.expanded;
+  }
+
+
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'source-selector': SourceSelector;
+  }
+}
