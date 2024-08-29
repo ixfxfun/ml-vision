@@ -25,7 +25,9 @@ export const defaults = (mode: ProcessorModes): Options => {
     remote: {
       allowNetwork: false,
     },
-    verbosity: `errors`
+    verbosity: `errors`,
+    wasmBase: './wasm',
+    modelsBase: '/models'
   }
   if (mode === `pose`) opts.pose = PoseDetector.defaults();
   else if (mode === `objects`) opts.objects = ObjectDetector.defaults();
@@ -51,7 +53,6 @@ export class MlVision extends EventTarget {
       ...options
     }
     this.#opts = opts;
-    console.log(opts);
     this.log = new Log(`MlVision`, opts.verbosity);
     const el = document.querySelector(elQuery) as VisionElement | null;
     if (!el) throw new Error(`VisionElement not found with query: ${ elQuery }`);
@@ -138,6 +139,7 @@ export class MlVision extends EventTarget {
     })
 
     this.sources.init();
+    if (opts.hideModelSelector) el.hideModelSelector = opts.hideModelSelector;
   }
 
 }

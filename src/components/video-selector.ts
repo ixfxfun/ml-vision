@@ -1,7 +1,6 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { afterMatch, snipBefore } from '../util/text.js';
-import type { RecordingData, SourceData } from '../types.js';
+import type { SourceData } from '../types.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import type { SourcesState } from '../sources/index.js';
 
@@ -128,6 +127,7 @@ export class VideoSelector extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    // @ts-ignore
     'video-selector': VideoSelector;
   }
 }

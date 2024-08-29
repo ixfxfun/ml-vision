@@ -1,14 +1,15 @@
 import type { ImageSource } from "@mediapipe/tasks-vision";
-import { type IModel, type ComputeCallback, type HandDetectorOptions } from "../types.js";
+import { type IModel, type ComputeCallback, type HandDetectorOptions, type CommonModelOptions } from "../types.js";
 import * as Mp from '@mediapipe/tasks-vision';
 import { Log } from "../util/log.js";
+import { makeModelPath } from "./makeModelPath.js";
 
 export class HandDetector implements IModel {
   hd: Mp.HandLandmarker | undefined;
   opts: HandDetectorOptions;
   log;
 
-  constructor(options: Partial<HandDetectorOptions> = {}) {
+  constructor(readonly p: CommonModelOptions, options: Partial<HandDetectorOptions> = {}) {
     this.opts = {
       ...HandDetector.defaults(),
       ...options
@@ -19,9 +20,8 @@ export class HandDetector implements IModel {
   static defaults(): HandDetectorOptions {
     return {
       verbosity: `errors`,
-      wasmPath: './wasm',
       numHands: 2,
-      modelPath: './models/hand_landmarker.task',
+      modelPath: 'hand_landmarker.task',
       minHandDetectionConfidence: 0.5,
       minHandPresenceConfidence: 0.5,
       minTrackingConfidence: 0.5,
@@ -40,10 +40,11 @@ export class HandDetector implements IModel {
 
   async init(): Promise<boolean> {
     const opts = this.opts;
-    const vision = await Mp.FilesetResolver.forVisionTasks(opts.wasmPath);
+    const p = this.p;
+    const vision = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const mpOpts: Mp.HandLandmarkerOptions = {
       baseOptions: {
-        modelAssetPath: this.opts.modelPath
+        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath)
       },
       minHandDetectionConfidence: opts.minHandDetectionConfidence,
       minHandPresenceConfidence: opts.minHandPresenceConfidence,

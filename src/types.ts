@@ -3,6 +3,7 @@ import type { PoseMatcherOptions } from "./mediapipe/pose-matcher.js"
 import type { Options as RemoteOptions } from "@clinth/remote"
 import * as Mp from '@mediapipe/tasks-vision';
 import type { ProcessorModes } from "./processor-modes.js";
+import type { Landmark, NormalizedLandmark } from "./types-mp.js";
 
 export type RecordingData = {
   name: string
@@ -28,9 +29,13 @@ export type CameraOptions = {
 
 export type ObjectDetectorOptions = {
   verbosity: Verbosity
-  wasmPath: string
   scoreThreshold: number
   modelPath: string
+}
+
+export type CommonModelOptions = {
+  wasmBase: string
+  modelsBase: string
 }
 
 export interface ISource {
@@ -40,7 +45,6 @@ export interface ISource {
 
 export type HandDetectorOptions = {
   verbosity: Verbosity
-  wasmPath: string
   numHands: number
   minHandDetectionConfidence: number
   minHandPresenceConfidence: number
@@ -50,9 +54,14 @@ export type HandDetectorOptions = {
 
 export type FaceDetectorOptions = {
   verbosity: Verbosity
-  wasmPath: string
   modelPath: string
+  /**
+   * Default: 0.5
+   */
   minDetectionConfidence: number
+  /**
+   * Default: 0.3
+   */
   minSupressionThreshold: number
 }
 
@@ -65,7 +74,6 @@ export type PoseDetectorOptions = {
   modelPath: string
   matcher: PoseMatcherOptions
   verbosity: Verbosity
-  wasmPath: string
 }
 
 export type OverlayOptions = {
@@ -76,6 +84,7 @@ export type OverlayOptions = {
 
 export type Options = {
   camera: CameraOptions
+  hideModelSelector?: boolean
   mode: ProcessorModes
   overlay: OverlayOptions
   pose?: PoseDetectorOptions
@@ -88,6 +97,8 @@ export type Options = {
    * 'errors','info','debug'
    */
   verbosity: Verbosity
+  wasmBase: string
+  modelsBase: string
 }
 
 
@@ -100,8 +111,10 @@ export interface IModel {
   init(): Promise<boolean>;
 }
 
+
 export type PoseData = {
   poseid: string,
-  landmarks: Mp.NormalizedLandmark[],
-  world: Mp.Landmark[]
+  landmarks: NormalizedLandmark[],
+  world: Landmark[]
 }
+

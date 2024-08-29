@@ -1,5 +1,6 @@
 import type { Dispatcher } from "../dispatcher.js";
-import type { ISource, ProcessorModes, RecordingData } from "../types.js";
+import type { ProcessorModes } from "../processor-modes.js";
+import type { ISource, RecordingData } from "../types.js";
 
 export class RecordPlayer implements ISource {
   #timer: number = 0;

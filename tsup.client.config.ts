@@ -1,11 +1,11 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entryPoints: [ 'src/index.ts' ],
+  entryPoints: [ './src/client/index.ts' ],
   format: [ 'esm' ],
   target: "chrome130",
   dts: true,
-  outDir: 'dist',
-  clean: true,
+  outDir: './dist/client',
+  clean: false,
   sourcemap: true
 });

@@ -1,7 +1,5 @@
-
-
 import { LitElement, html, css } from 'lit';
-import { customElement, property } from 'lit/decorators.js';
+import { customElement } from 'lit/decorators.js';
 import { getProcessorModes, validateProcessorMode } from '../processor-modes.js';
 
 @customElement('model-element')
@@ -37,6 +35,7 @@ export class ModelElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    // @ts-ignore
     'model-element': ModelElement;
   }
 }

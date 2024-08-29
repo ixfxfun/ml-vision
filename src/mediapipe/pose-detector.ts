@@ -1,7 +1,8 @@
 import * as Mp from '@mediapipe/tasks-vision';
-import type { ComputeCallback, IModel, PoseDetectorOptions } from '../types.js';
+import type { CommonModelOptions, ComputeCallback, IModel, Options, PoseDetectorOptions } from '../types.js';
 import { PoseMatcher } from './pose-matcher.js';
 import { Log } from '../util/log.js';
+import { makeModelPath } from './makeModelPath.js';
 // https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker/web_js#configuration_options
 
 export class PoseDetector implements IModel {
@@ -9,7 +10,8 @@ export class PoseDetector implements IModel {
   opts: PoseDetectorOptions;
   matcher: PoseMatcher;
   log;
-  constructor(opts: Partial<PoseDetectorOptions> = {}) {
+
+  constructor(readonly p: CommonModelOptions, opts: Partial<PoseDetectorOptions> = {}) {
     this.opts = {
       ...PoseDetector.defaults(),
       ...opts
@@ -25,8 +27,7 @@ export class PoseDetector implements IModel {
       minPosePresenceConfidence: 0.3,
       minTrackingConfidence: 0.3,
       outputSegmentationMasks: false,
-      modelPath: './models/pose_landmarker_full.task',
-      wasmPath: './wasm',
+      modelPath: 'pose_landmarker_full.task',
       verbosity: `errors`,
       matcher: {
         distanceThreshold: 0.1,
@@ -43,11 +44,12 @@ export class PoseDetector implements IModel {
   }
 
   async init() {
-    const v = await Mp.FilesetResolver.forVisionTasks(this.opts.wasmPath);
+    const p = this.p;
+    const v = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const opts = this.opts;
     const mpOpts: Mp.PoseLandmarkerOptions = {
       baseOptions: {
-        modelAssetPath: opts.modelPath,
+        modelAssetPath: makeModelPath(p.modelsBase, opts.modelPath),
         delegate: `GPU`
       },
       runningMode: `VIDEO`,

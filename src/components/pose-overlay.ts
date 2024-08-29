@@ -214,6 +214,7 @@ export class OverlayElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    // @ts-ignore
     'overlay-element': OverlayElement;
   }
 }

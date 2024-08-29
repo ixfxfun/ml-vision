@@ -29,6 +29,9 @@ export class VisionElement extends LitElement {
   @property()
   recorder: Recorder | undefined;
 
+  @property()
+  hideModelSelector = false;
+
   override render() {
     return html`
       <div id="sources">
@@ -36,9 +39,12 @@ export class VisionElement extends LitElement {
         <overlay-element @click=${ this.onOverlayClick } id="overlay" ${ ref(this.overlayEl) } ></overlay-element>
       </div>
       <div id="controls">
-        <details><summary>Model</summary>
-          <model-element @request-mode=${ this.onRequestMode }></model-element>
-        </details>
+        ${ this.hideModelSelector ?
+        html`` :
+        html`<details><summary>Model</summary>
+                  <model-element @request-mode=${ this.onRequestMode }></model-element>
+                </details>`
+      }
         <details><summary>Source</summary>
           <fieldset @change=${ this.onSelectSource }>
             <input type="radio" checked name="source" id="source-video" value="video"><label for="source-video">Video</label>
@@ -331,6 +337,7 @@ export class VisionElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    // @ts-ignore
     'vision-element': VisionElement;
   }
 }

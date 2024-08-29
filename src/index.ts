@@ -9,3 +9,4 @@ export * from './mediapipe/pose-detector.js';
 export * from './mediapipe/pose-matcher.js';
 export * from './client.js';
 export * from './processing.js';
+export * from './types-mp.js'

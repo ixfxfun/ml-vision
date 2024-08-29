@@ -1,14 +1,15 @@
 import type { ImageSource } from "@mediapipe/tasks-vision";
-import { type IModel, type ComputeCallback, type ObjectDetectorOptions } from "../types.js";
+import { type IModel, type ComputeCallback, type ObjectDetectorOptions, type Options, type CommonModelOptions } from "../types.js";
 import * as Mp from '@mediapipe/tasks-vision';
 import { Log } from "../util/log.js";
+import { makeModelPath } from "./makeModelPath.js";
 
 export class ObjectDetector implements IModel {
   od: Mp.ObjectDetector | undefined;
   opts: ObjectDetectorOptions;
   log;
 
-  constructor(options: Partial<ObjectDetectorOptions> = {}) {
+  constructor(readonly p: CommonModelOptions, options: Partial<ObjectDetectorOptions> = {}) {
     this.opts = {
       ...ObjectDetector.defaults(),
       ...options
@@ -18,9 +19,8 @@ export class ObjectDetector implements IModel {
 
   static defaults(): ObjectDetectorOptions {
     return {
-      wasmPath: './wasm',
       verbosity: `errors`,
-      modelPath: './models/efficientdet_lite0.tflite',
+      modelPath: 'efficientdet_lite0.tflite',
       scoreThreshold: 0.5
     }
   }
@@ -36,10 +36,11 @@ export class ObjectDetector implements IModel {
   }
 
   async init(): Promise<boolean> {
-    const vision = await Mp.FilesetResolver.forVisionTasks(this.opts.wasmPath);
+    const p = this.p;
+    const vision = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const mpOpts: Mp.ObjectDetectorOptions = {
       baseOptions: {
-        modelAssetPath: this.opts.modelPath
+        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath)
       },
       scoreThreshold: 0.5,
       runningMode: `VIDEO`

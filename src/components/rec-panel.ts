@@ -6,13 +6,7 @@ import type { RecordingData, SourceData, Verbosity } from '../types.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import type { SourcesState } from '../sources/index.js';
 
-/**
- * An example element.
- *
- * @fires count-changed - Indicates when the count changes
- * @slot - This element has a slot
- * @csspart button - The button
- */
+
 @customElement('rec-panel')
 export class RecPanel extends LitElement {
   static override styles = css`

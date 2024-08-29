@@ -1,7 +1,7 @@
-import { LitElement, html, css, type PropertyValues } from 'lit';
+import { LitElement, html, css } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { createRef, type Ref, ref } from 'lit/directives/ref.js';
-import type { SourceData, Verbosity } from '../types.js';
+import type { SourceData } from '../types.js';
 import { Log } from '../util/log.js';
 
 export type VideoSourceStates = `started` | `stopped`;
@@ -157,6 +157,7 @@ export class VideoSourceElement extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
+    // @ts-ignore
     'video-source': VideoSourceElement;
   }
 }
