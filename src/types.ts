@@ -1,5 +1,4 @@
 import type { ImageSource } from "@mediapipe/tasks-vision"
-import type { PoseMatcherOptions } from "./mediapipe/pose-matcher.js"
 import type { Options as RemoteOptions } from "@clinth/remote"
 import * as Mp from '@mediapipe/tasks-vision';
 import type { ProcessorModes } from "./processor-modes.js";
@@ -41,6 +40,21 @@ export type CommonModelOptions = {
 export interface ISource {
   start(): Promise<boolean>
   stop(): void
+}
+
+export type PoseMatcherOptions = {
+  /**
+   * If pose is more than this distance away, assume it's a different body
+   * Default: 0.1
+   */
+  distanceThreshold: number
+  /**
+   * If a pose hasn't been seen for this long, delete.
+   * Default: 2000
+   */
+  maxAgeMs: number
+
+  verbosity: Verbosity
 }
 
 export type HandDetectorOptions = {

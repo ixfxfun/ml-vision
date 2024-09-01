@@ -1,7 +1,7 @@
 import * as Mp from '@mediapipe/tasks-vision';
 import { Points, type Point } from 'ixfx/geometry.js';
 import { shortGuid } from 'ixfx/random.js';
-import type { PoseData, Verbosity } from '../types.js';
+import type { PoseData, PoseMatcherOptions, Verbosity } from '../types.js';
 import { Log } from '../util/log.js';
 
 class TrackedPose {
@@ -14,20 +14,7 @@ class TrackedPose {
   }
 }
 
-export type PoseMatcherOptions = {
-  /**
-   * If pose is more than this distance away, assume it's a different body
-   * Default: 0.1
-   */
-  distanceThreshold: number
-  /**
-   * If a pose hasn't been seen for this long, delete.
-   * Default: 2000
-   */
-  maxAgeMs: number
 
-  verbosity: Verbosity
-}
 
 export const getLowest = <T>(data: Array<T>, fn: (d: T) => number) => {
   const ranked = data.map(d => fn(d));

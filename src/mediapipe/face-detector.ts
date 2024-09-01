@@ -1,8 +1,7 @@
 import type { ImageSource } from "@mediapipe/tasks-vision";
-import { type IModel, type ComputeCallback, type FaceDetectorOptions, type Options, type CommonModelOptions } from "../types.js";
+import { type IModel, type ComputeCallback, type FaceDetectorOptions, type CommonModelOptions } from "../types.js";
 import * as Mp from '@mediapipe/tasks-vision';
 import { Log } from "../util/log.js";
-import type { Processing } from "../processing.js";
 import { makeModelPath } from "./makeModelPath.js";
 
 export class FaceDetector implements IModel {
