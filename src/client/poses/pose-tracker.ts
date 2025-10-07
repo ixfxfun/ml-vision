@@ -1,5 +1,3 @@
-//import { PointTracker, TrackedPointMap, points as pointsTracker, type TrackedValueOpts } from '@ixfx/geo.js';
-
 import { Points, PointsTracker, PointTracker, Rects, type Point, type RectPositioned } from 'ixfx/geometry.js';
 import type { PoseData } from './index.js';
 import { getLandmarkNameByIndex, type PoseLandmarks } from './landmarks.js';
@@ -71,7 +69,8 @@ export class PoseTracker {
       id: poseId,
       debug: options.debug ?? false,
       sampleLimit: 10,
-      storeIntermediate: false
+      storeIntermediate: false,
+      ...options
     }
     this.points = new PointsTracker(opts);
   }
@@ -148,72 +147,109 @@ export class PoseTracker {
    * Returns all the [PointTrackers](https://api.ixfx.fun/_ixfx/geometry/PointTracker/) (ie. landmark) for this pose.
    * 
    * ```js
-   * for (const pt of pose.getPointTrackers()) {
+   * for (const pt of pose.landmarks()) {
    *  // Do something with 'pt' (which tracks one individual landmark)
    * }
    * ```
+   * 
+   * Or provide a list of landmark indexes or name:
+   * ```js
+   * // Get landmarks for right arm
+   * for (const pt of pose.landmarks(11, 13, 15)) {
+   * }
+   * ```
    */
-  *getPointTrackers() {
-    yield* this.points.store.values();
+  *landmarks(...namesOrIds: (PoseLandmarks | number)[]) {
+    if (namesOrIds.length > 0) {
+      for (const ni of namesOrIds) {
+        const l = this.landmark(ni);
+        if (l) yield l;
+      }
+    } else {
+      yield* this.points.store.values();
+    }
+
   }
+
 
   /**
    * Returns the raw landmarks
    * 
    * ```js
-   * for (const kp of pose.getRawValues()) {
+   * for (const kp of pose.landmarkValues()) {
    *  // { x, y, z?, score, name }
    * }
    * ```
-   * @returns {Point>}
    */
-  *getRawValues() {
-    for (const v of this.points.store.values()) {
-      yield v.last;
+  *landmarkValues(...namesOrIds: (PoseLandmarks | number)[]) {
+    if (namesOrIds.length > 0) {
+      for (const ni of namesOrIds) {
+        const pt = this.landmark(ni);
+        if (pt) yield pt.last;
+      }
+    } else {
+      for (const v of this.points.store.values()) {
+        yield v.last;
+      }
     }
   }
 
   /**
    * Returns the centroid of all the pose points
    * ```js
-   * pose.centroid; // { x, y }
+   * pose.centroid(); // { x, y }
    * ```
    * 
-   * Returns {0.5,0.5} is data is missing
+   * Or you can pass in the names/indexes of landmarks:
+   * ```js
+   * pose.centroid(`left_shoulder`, `right_shoulder`);
+   * ```
+   * 
+   * Returns `{ x: 0.5, y: 0.5 }` is data is missing
    */
-  get centroid() {
+  centroid(...namesOrIds: (PoseLandmarks | number)[]) {
     if (!this.#data) return { x: 0.5, y: 0.5 };
-    return centroid(this.#data);
+    if (namesOrIds.length === 0) {
+      return centroid(this.#data);
+    } else {
+      const pts = [ ...this.landmarkValues(...namesOrIds) ];
+      return Points.centroid(...pts);
+    }
   }
 
   /**
    * Returns height of bounding box
    */
   get height() {
-    return this.box.height;
+    return this.box().height;
   }
 
   /**
    * Return width of bounding box
    */
   get width() {
-    return this.box.width;
+    return this.box().width;
   }
 
 
   /**
    * Gets the bounding box of the pose, computed by 'landmarks'.
    * ```js
-   * pose.box; // { x, y, width, height }
+   * pose.box(); // { x, y, width, height }
    * ````
    * 
    * Returns an empty rectangle if there's no data
    */
-  get box() {
-    if (this.#box) return this.#box;
+  box(...namesOrIds: (PoseLandmarks | number)[]) {
     if (!this.#data) return Rects.EmptyPositioned;
-    this.#box = Points.bbox(...this.#data.landmarks);
-    return this.#box;
+
+    if (namesOrIds.length === 0) {
+      if (this.#box) return this.#box;
+      this.#box = Points.bbox(...this.#data.landmarks);
+      return this.#box;
+    } else {
+      return Points.bbox(...this.landmarkValues(...namesOrIds));
+    }
   }
 
   /**
@@ -231,7 +267,7 @@ export class PoseTracker {
    * @returns 
    */
   get middle() {
-    const box = this.box;
+    const box = this.box();
     if (box) {
       return {
         x: box.x + box.width / 2,
