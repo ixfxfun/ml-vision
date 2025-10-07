@@ -1,6 +1,5 @@
 import type { TrackedValueOpts } from "ixfx/trackers.js";
 import type { PoseData } from "./index.js";
-import { SimpleEventEmitter } from "ixfx/events.js";
 import { PoseTracker } from "./pose-tracker.js";
 import { getLandmarkIndexByName, type PoseLandmarks } from "./landmarks.js";
 
@@ -30,7 +29,6 @@ export class PosesTracker extends EventTarget {
     super();
     this.#options = {
       maxAgeMs: 10_000,
-      resetAfterSamples: 0,
       sampleLimit: 100,
       storeIntermediate: false,
       ...options
