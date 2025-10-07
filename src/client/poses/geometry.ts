@@ -21,6 +21,7 @@ export const horizontalSort = (poses: PoseData[]) => {
  */
 export const centroid = (pose: PoseData) => Points.centroid(...pose.landmarks);
 
+
 /**
  * Return centroid of pose based on world landmarks
  */
