@@ -1,6 +1,6 @@
 {
   "name": "ml-vision",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "main": "dist/index.js",
   "files": [
     "dist"
@@ -11,7 +11,7 @@
     "@changesets/cli": "^2.27.7",
     "@clinth/remote": "2.1.2",
     "@mediapipe/tasks-vision": "0.10.14",
-    "ixfx": "0.29.1",
+    "ixfx": "1.8.0",
     "lit": "3.2.0",
     "rimraf": "6.0.1",
     "tsup": "^8.2.4",
@@ -19,10 +19,10 @@
     "typescript": "5.5.4"
   },
   "scripts": {
-    "build:all":"rimraf dist && npm run build:main && npm run build:client",
+    "build:all": "rimraf dist && npm run build:main && npm run build:client",
     "build:main": "tsup --config tsup.main.config.ts",
     "build:client": "tsup --config tsup.client.config.ts && npm run docs:client",
-    "ci": "npm run build && npm run check-exports && npm run lint",
+    "ci": "npm run build:all && npm run check-exports && npm run lint",
     "lint": "tsc",
     "format": "prettier --write .",
     "check-exports": "attw --pack .",

@@ -4,7 +4,7 @@ import { createRef, type Ref, ref } from 'lit/directives/ref.js';
 import * as D from '../util/drawing.js';
 import { type NormalizedLandmark, type Detection, type HandLandmarkerResult, type BoundingBox } from '@mediapipe/tasks-vision';
 import type { PoseData } from '../types.js';
-import { expiringMap } from 'ixfx/maps.js';
+import { ExpiringMap } from 'ixfx/collections.js';
 import { Colour } from 'ixfx/visual.js';
 import type { ProcessorModes } from '../processor-modes.js';
 
@@ -20,7 +20,7 @@ export class OverlayElement extends LitElement {
   `;
 
   canvasEl: Ref<HTMLCanvasElement> = createRef();
-  #colours = expiringMap<string, string>({
+  #colours = new ExpiringMap<string, string>({
     autoDeleteElapsedMs: 1000,
     autoDeletePolicy: `get`,
   });

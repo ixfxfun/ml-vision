@@ -1,10 +1,13 @@
-import { PointTracker, TrackedPointMap, points as pointsTracker, type TrackedValueOpts } from 'ixfx/trackers.js';
-import { Points, Rects, type Point, type RectPositioned } from 'ixfx/geometry.js';
+//import { PointTracker, TrackedPointMap, points as pointsTracker, type TrackedValueOpts } from '@ixfx/geo.js';
+
+import { Points, PointsTracker, PointTracker, Rects, type Point, type RectPositioned } from 'ixfx/geometry.js';
 import type { PoseData } from './index.js';
 import { getLandmarkNameByIndex, type PoseLandmarks } from './landmarks.js';
 import { centroid } from './geometry.js';
+import type { TrackedValueOpts } from 'ixfx/trackers.js';
 
 export type { TrackedValueOpts }
+
 /**
  * PoseTracker keeps track of a landmarks for a single pose. 
  * This is useful for tracking the movement of a pose or its landmarks over time.
@@ -32,7 +35,7 @@ export type { TrackedValueOpts }
  * // { x, y, score, name }
  * }
  * ```
- * But the real power comes from getting the [PointTracker](https://api.ixfx.fun/classes/Trackers.PointTracker) for a keypoint, since it keeps track of not just the last data, but a whole trail of historical data for a given keypoint.
+ * But the real power comes from getting the [PointTracker](https://api.ixfx.fun/_ixfx/geometry/PointTracker/) for a keypoint, since it keeps track of not just the last data, but a whole trail of historical data for a given keypoint.
  * ```js
  * const noseTracker = pose.keypoint(`nose`); // PointTracker
  * ```
@@ -46,7 +49,7 @@ export class PoseTracker {
   #seen = 0;
   #box: RectPositioned | undefined;
   #data: PoseData | undefined;
-  points: TrackedPointMap;
+  points: PointsTracker;
   #hue: number;
 
   /**
@@ -70,7 +73,7 @@ export class PoseTracker {
       sampleLimit: 10,
       storeIntermediate: false
     }
-    this.points = pointsTracker(opts);
+    this.points = new PointsTracker(opts);
   }
 
   /**
@@ -81,7 +84,7 @@ export class PoseTracker {
   }
 
   /**
-   * Returns a [PointTracker](https://api.ixfx.fun/classes/Trackers.PointTracker) for a given landmark
+   * Returns a [PointTracker](https://api.ixfx.fun/_ixfx/geometry/PointTracker/) for a given landmark
    * by name or index.
    * 
    * ```js
@@ -97,12 +100,12 @@ export class PoseTracker {
    * @param nameOrIndex 
    * @returns 
    */
-  landmark(nameOrIndex: PoseLandmarks | number) {
+  landmark(nameOrIndex: PoseLandmarks | number): PointTracker | undefined {
     if (nameOrIndex === undefined) throw new TypeError(`Param 'nameOrIndex' is undefined. Expected landmark name or numerical index`);
     if (typeof nameOrIndex === `number`) {
-      return this.points.get(getLandmarkNameByIndex(nameOrIndex));
+      return this.points.get(getLandmarkNameByIndex(nameOrIndex)) as PointTracker | undefined;
     } else {
-      return this.points.get(nameOrIndex);
+      return this.points.get(nameOrIndex) as PointTracker | undefined;
     }
   }
 
@@ -142,7 +145,7 @@ export class PoseTracker {
   }
 
   /**
-   * Returns all the [PointTrackers](https://api.ixfx.fun/classes/Trackers.PointTracker) (ie. landmark) for this pose.
+   * Returns all the [PointTrackers](https://api.ixfx.fun/_ixfx/geometry/PointTracker/) (ie. landmark) for this pose.
    * 
    * ```js
    * for (const pt of pose.getPointTrackers()) {
