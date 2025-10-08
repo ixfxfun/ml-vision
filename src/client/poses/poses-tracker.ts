@@ -2,6 +2,7 @@ import type { TrackedValueOpts } from "ixfx/trackers.js";
 import type { PoseData } from "./index.js";
 import { PoseTracker } from "./pose-tracker.js";
 import { getLandmarkIndexByName, type PoseLandmarks } from "./landmarks.js";
+import { Points } from "ixfx/geometry.js";
 
 export type PosesTrackerOptions = TrackedValueOpts & {
   maxAgeMs: number
@@ -58,12 +59,67 @@ export class PosesTracker extends EventTarget {
   }
 
   /**
-   * Enumerates PoseTrackers, sorting by the horizontal position.
+   * Enumerates PoseTrackers, sorting by the horizontal middle position.
    * Leftmost pose will be at position 0.
    */
   *getByHorizontal() {
     const trackers = [ ...this.#data.values() ];
     trackers.sort((a, b) => a.middle.x - b.middle.x);
+    yield* trackers;
+  }
+
+  /**
+   * Returns poses in order of distance (as judged by their centroid property)
+   * from the given point.
+   * 
+   * The point should be the same coordinates as poses.
+   * @param guid 
+   */
+  getByDistanceFromPoint(point: Points.Point) {
+    const withDistance = [ ...this.#data.values() ].map(pt => {
+      return {
+        distance: Points.distance(pt.centroid(), point),
+        tracker: pt
+      }
+    });
+    withDistance.sort((a, b) => {
+      return a.distance - b.distance;
+    });
+    return withDistance;
+  }
+
+  /**
+   * Returns the closest pose to `point`, as judged by its centroid property
+   * @param point 
+   * @returns 
+   */
+  getClosestPoseToPoint(point: Points.Point) {
+    const sorted = this.getByDistanceFromPoint(point);
+    if (sorted.length === 0) return;
+    return sorted[ 0 ].tracker;
+  }
+
+  /**
+   * Enumerates PoseTrackers, sorting by the vertical middle position.
+   * Highest pose will be at position 0.
+   */
+  *getByVertical() {
+    const trackers = [ ...this.#data.values() ];
+    trackers.sort((a, b) => a.middle.y - b.middle.y);
+    yield* trackers;
+  }
+
+  /**
+   * Enumerates PoseTrackers, sorting by the average Z value.
+   * Closest pose will be at position 0.
+   */
+  *getByDistance() {
+    const trackers = [ ...this.#data.values() ];
+    trackers.sort((a, b) => {
+      const az = a.zRange ? a.zRange.avg : 0;
+      const bz = b.zRange ? b.zRange.avg : 0;
+      return az - bz;
+    });
     yield* trackers;
   }
 
@@ -100,47 +156,44 @@ export class PosesTracker extends EventTarget {
    * 
    * @example Get the 'nose' landmark for all bodies
    * ````js
-   * for (const n of poses.getRawLandmarks(`nose`)) {
+   * for (const n of poses.landmarkValues(`nose`)) {
    *  // Yields: { x, y, z?, score, name }
    * }
    * ```
    * 
-   * @param nameOrIndex Name or index of landmark to get data for
+   * @param namesOrIds Name or index of landmark to get data for
    */
-  *getRawLandmarks(nameOrIndex: string | number) {
-    if (typeof nameOrIndex === `undefined`) throw new TypeError(`Param 'nameOrIndex' is undefined. Expected landmark name or numerical index`);
-    const index = typeof nameOrIndex === `number` ? nameOrIndex : getLandmarkIndexByName(nameOrIndex);
-    if (index === undefined) throw new Error(`Landmark unknown: '${ name }'`);
-    for (const pose of this.getRawPoses()) {
-      const kp = pose.landmarks[ index ];
-      if (kp !== undefined) yield kp;
+  *landmarkValues(...namesOrIds: (PoseLandmarks | number)[]) {
+    for (const pose of this.get()) {
+      yield* pose.landmarkValues(...namesOrIds);
     }
   }
 
   /**
    * Enumerates all [PointTrackers](https://api.ixfx.fun/classes/Trackers.PointTracker) for a given landmark id.
    * 
+   * ```js
+   * // Return all landmarks for all poses
+   * for (const pt of poses.landmarks()) {
+   * }
+   * ```
+   * 
    * eg. to get the PointTracker for 'nose' across all poses currently seen:
    * 
    * ```js
-   * for (const pt of poses.getPointTrackers(`nose`)) {
+   * for (const pt of poses.landmarks(`nose`)) {
    *  // do something with tracker...
    * }
    * ```
    * 
-   * Throws an error if `nameOrIndex` is not found.
-   * 
-   * @param nameOrIndex Name or index of landmark to get tracker for
+   * @param namesOrIds List of indexes or landmark names to filter by
    */
-  *getPointTrackers(nameOrIndex: PoseLandmarks | number) {
-    if (typeof nameOrIndex === `undefined`) throw new TypeError(`Param 'nameOrIndex' is undefined. Expected landmark name or numerical index`);
-    const index = typeof nameOrIndex === `number` ? nameOrIndex : getLandmarkIndexByName(nameOrIndex);
-    if (index === undefined) throw new Error(`Landmark unknown: '${ name }'`);
+  *landmarks(...namesOrIds: (PoseLandmarks | number)[]) {
     for (const tracker of this.get()) {
-      yield tracker.landmark(nameOrIndex);
-
+      yield* tracker.landmarks(...namesOrIds);
     }
   }
+
 
   /**
    * Returns all [PointTrackers](https://api.ixfx.fun/classes/Trackers.PointTracker) from a particular sender
@@ -235,11 +288,23 @@ export class PosesTracker extends EventTarget {
    * ```
    * 
    * Alternatively: {@link getRawPoseByGuid} to get raw data
-   * @param id Combined id of sender-poseid
+   * @param guid Combined id of sender-poseid
    */
-  getByGuid(id: string) {
-    return this.#data.get(id);
+  getByGuid(guid: string | undefined) {
+    if (!guid) return;
+    return this.#data.get(guid);
   }
+
+  /**
+   * Returns _true_ if a PoseTracker for `guid` is found.
+   * @param guid 
+   */
+  hasPoseGuid(guid: string | undefined) {
+    if (!guid) return false;
+    return this.#data.has(guid);
+  }
+
+
 
   /**
    * Returns the raw pose data for a unique id
@@ -250,11 +315,11 @@ export class PosesTracker extends EventTarget {
    * ```
    * 
    * Alternatively: {@link getByGuid} to get a tracker for pose
-   * @param id Combined sender-pose
+   * @param guid Combined sender-pose
    * @returns 
    */
-  getRawPoseByGuid(id: string) {
-    return this.#data.get(id)?.last;
+  getRawPoseByGuid(guid: string) {
+    return this.#data.get(guid)?.last;
   }
 
   /**

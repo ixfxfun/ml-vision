@@ -71,11 +71,10 @@ export class Processing extends EventTarget {
     }
     return modelOpts;
   }
+
   async start(video: HTMLVideoElement) {
     this.setState(`starting`);
     this.#videoEl = video;
-
-
     switch (this.#currentMode) {
       case `pose`: {
         this.log.info(this.poseOptions);
@@ -156,10 +155,23 @@ export class Processing extends EventTarget {
     return this.#state === `started`;
   }
 
+  get state() {
+    return this.#state;
+  }
+
   get currentMode() {
     return this.#currentMode;
   }
 
+  get currentModel() {
+    return this.#model;
+  }
 
+  get currentModelPoseDetector(): PoseDetector {
+    if (this.#currentMode !== `pose`) {
+      throw new Error(`Current mode is not 'pose': ${ this.#currentMode }`);
+    }
+    return this.#model as PoseDetector;
+  }
 
 }

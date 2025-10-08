@@ -36,6 +36,10 @@ export const defaults = (mode: ProcessorModes): Options => {
 };
 
 
+/**
+ * Events:
+ * * processorstate: processor has changed state
+ */
 export class MlVision extends EventTarget {
   el: VisionElement;
   sources;
@@ -61,6 +65,13 @@ export class MlVision extends EventTarget {
     this.sources = new Sources(opts.camera, this);
     this.dispatcher = new Dispatcher(opts);
     this.#proc = new Processing(this, opts);
+    this.#proc.addEventListener(`state`, event => {
+      this.dispatchEvent(new CustomEvent(`processorstate`, { detail: this.#proc.state }));
+    })
+  }
+
+  get processing() {
+    return this.#proc;
   }
 
   init() {

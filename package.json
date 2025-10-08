@@ -9,14 +9,14 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.15.4",
     "@changesets/cli": "^2.27.7",
-    "@clinth/remote": "2.1.2",
+    "@clinth/remote": "2.2.0",
     "@mediapipe/tasks-vision": "0.10.14",
     "lit": "3.2.0",
     "rimraf": "6.0.1",
     "tsup": "^8.2.4",
     "typedoc": "0.26.6",
     "typescript": "5.5.4",
-    "ixfx": "1.10.0"
+    "ixfx": "1.12.0"
   },
   "scripts": {
     "build:all": "rimraf dist && npm run build:main && npm run build:client && npm run build:client-docs",

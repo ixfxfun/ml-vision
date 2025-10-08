@@ -175,10 +175,7 @@ export class VisionElement extends LitElement {
     } else {
       console.warn(`Not able to set recordings, element missing.`)
     }
-
   }
-
-
 
   override connectedCallback(): void {
     super.connectedCallback();

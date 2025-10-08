@@ -60,10 +60,56 @@ export class PoseDetector implements IModel {
       outputSegmentationMasks: opts.outputSegmentationMasks
     };
     this.log.info(mpOpts);
-
-
     this.lp = await Mp.PoseLandmarker.createFromOptions(v, mpOpts);
     return true;
+  }
+
+  set minPoseDetectionConfidence(value: number) {
+    this.opts = {
+      ...this.opts,
+      minPoseDetectionConfidence: value
+    }
+    this.lp?.setOptions({ minPoseDetectionConfidence: value });
+  }
+
+  get minPoseDetectionConfidence() {
+    return this.opts.minPoseDetectionConfidence;
+  }
+
+  set minPosePresenceConfidence(value: number) {
+    this.opts = {
+      ...this.opts,
+      minPosePresenceConfidence: value
+    }
+    this.lp?.setOptions({ minPosePresenceConfidence: value });
+  }
+
+  get minPosePresenceConfidence() {
+    return this.opts.minPosePresenceConfidence;
+  }
+
+  set minTrackingConfidence(value: number) {
+    this.opts = {
+      ...this.opts,
+      minTrackingConfidence: value
+    }
+    this.lp?.setOptions({ minTrackingConfidence: value });
+  }
+
+  get minTrackingConfidence() {
+    return this.opts.minTrackingConfidence;
+  }
+
+  set numPoses(value: number) {
+    this.opts = {
+      ...this.opts,
+      numPoses: value
+    }
+    this.lp?.setOptions({ numPoses: value });
+  }
+
+  get numPoses() {
+    return this.opts.numPoses;
   }
 
   dispose() {
