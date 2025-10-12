@@ -22,7 +22,10 @@ export class FaceDetector implements IModel {
       verbosity: `errors`,
       modelPath: 'blaze_face_short_range.tflite',
       minDetectionConfidence: 0.5,
-      minSupressionThreshold: 0.3
+      minSupressionThreshold: 0.3,
+      presetModelPaths: {
+        shortRange: `https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/latest/blaze_face_short_range.tflite`
+      }
     }
   }
 
@@ -38,11 +41,12 @@ export class FaceDetector implements IModel {
 
   async init(): Promise<boolean> {
     const opts = this.opts;
+    const presets = this.opts.presetModelPaths ?? FaceDetector.defaults().presetModelPaths as Record<string, string>
     const p = this.p;
     const vision = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const mpOpts: Mp.FaceDetectorOptions = {
       baseOptions: {
-        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath)
+        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath, presets)
       },
       minDetectionConfidence: opts.minDetectionConfidence,
       minSuppressionThreshold: opts.minSupressionThreshold,

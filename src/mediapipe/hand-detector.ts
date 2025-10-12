@@ -25,6 +25,9 @@ export class HandDetector implements IModel {
       minHandDetectionConfidence: 0.5,
       minHandPresenceConfidence: 0.5,
       minTrackingConfidence: 0.5,
+      presetModelPaths: {
+        full: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/latest/hand_landmarker.task`
+      }
     }
   }
 
@@ -40,11 +43,12 @@ export class HandDetector implements IModel {
 
   async init(): Promise<boolean> {
     const opts = this.opts;
+    const presets = this.opts.presetModelPaths ?? HandDetector.defaults().presetModelPaths as Record<string, string>;
     const p = this.p;
     const vision = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const mpOpts: Mp.HandLandmarkerOptions = {
       baseOptions: {
-        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath)
+        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath, presets)
       },
       minHandDetectionConfidence: opts.minHandDetectionConfidence,
       minHandPresenceConfidence: opts.minHandPresenceConfidence,

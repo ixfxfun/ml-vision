@@ -33,6 +33,11 @@ export class PoseDetector implements IModel {
         distanceThreshold: 0.1,
         maxAgeMs: 2000,
         verbosity: `errors`
+      },
+      presetModelPaths: {
+        lite: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task',
+        full: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task',
+        heavy: 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_heavy/float16/latest/pose_landmarker_heavy.task'
       }
     }
   }
@@ -47,9 +52,10 @@ export class PoseDetector implements IModel {
     const p = this.p;
     const v = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const opts = this.opts;
+    const presets = this.opts.presetModelPaths ?? PoseDetector.defaults().presetModelPaths as Record<string, string>
     const mpOpts: Mp.PoseLandmarkerOptions = {
       baseOptions: {
-        modelAssetPath: makeModelPath(p.modelsBase, opts.modelPath),
+        modelAssetPath: makeModelPath(p.modelsBase, opts.modelPath, presets),
         delegate: `GPU`
       },
       runningMode: `VIDEO`,

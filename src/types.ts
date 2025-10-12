@@ -26,10 +26,19 @@ export type CameraOptions = {
   facingMode?: `user` | `environment`
 }
 
+/**
+ * Object detector options.
+ * 
+ * Preset model names:
+ * * EfficientDet-Lite0: lite0-8, lite0-16, lite0-32
+ * * EfficientDet-Lite2: lite2-8, lite2-16, lite2-32
+ * * SSDMObileNet-V2: mobilenet2-8, mobilenet2-32
+ */
 export type ObjectDetectorOptions = {
   verbosity: Verbosity
   scoreThreshold: number
-  modelPath: string
+  modelPath: string,
+  presetModelPaths?: Record<string, string>
 }
 
 export type CommonModelOptions = {
@@ -64,6 +73,7 @@ export type HandDetectorOptions = {
   minHandPresenceConfidence: number
   minTrackingConfidence: number
   modelPath: string
+  presetModelPaths?: Record<string, string>
 }
 
 export type FaceDetectorOptions = {
@@ -77,8 +87,12 @@ export type FaceDetectorOptions = {
    * Default: 0.3
    */
   minSupressionThreshold: number
+  presetModelPaths?: Record<string, string>
 }
 
+/**
+ * Preset model names: lite, full, heavy.
+ */
 export type PoseDetectorOptions = {
   numPoses: number
   minPoseDetectionConfidence: number
@@ -88,13 +102,13 @@ export type PoseDetectorOptions = {
   modelPath: string
   matcher: PoseMatcherOptions
   verbosity: Verbosity
+  presetModelPaths?: Record<string, string>
 }
 
 export type OverlayOptions = {
   show: boolean
   label: boolean
 }
-
 
 export type Options = {
   camera: CameraOptions

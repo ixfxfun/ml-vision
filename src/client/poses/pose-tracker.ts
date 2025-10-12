@@ -287,7 +287,7 @@ export class PoseTracker {
   }
 
   /**
-   * Returns the centroid of all the pose points (uses normalised landmarks)
+   * Returns the 2D centroid of all the pose points (uses normalised landmarks)
    * ```js
    * pose.centroid(); // { x, y }
    * ```
@@ -375,12 +375,13 @@ export class PoseTracker {
    * Returns landmarks in order of distance from the given point.
    * 
    * The point should be the same coordinates as poses.
-   * @param guid 
+   * @param point Point to compare to
+   * @param use2d If _true_, Z coordinate is ignored.
    */
-  getByDistanceFromPoint(point: Points.Point) {
+  getByDistanceFromPoint(point: Points.Point, use2d: boolean = true) {
     const withDistance = [ ...this.landmarks() ].map(lm => {
       return {
-        distance: Points.distance(lm.last, point),
+        distance: use2d ? Points.distance2d(lm.last, point) : Points.distance(lm.last, point),
         landmark: lm,
         raw: lm.last as NormalizedLandmark
       }
@@ -394,10 +395,11 @@ export class PoseTracker {
   /**
    * Returns the closest landmark to `point`
    * @param point 
+   * @param use2d If _true_ only x,y coordinates are used for distance calculation
    * @returns 
    */
-  getClosestLandmarkToPoint(point: Points.Point) {
-    const sorted = this.getByDistanceFromPoint(point);
+  getClosestLandmarkToPoint(point: Points.Point, use2d: boolean) {
+    const sorted = this.getByDistanceFromPoint(point, use2d);
     if (sorted.length === 0) return;
     return sorted[ 0 ].landmark;
   }

@@ -70,15 +70,15 @@ export class PosesTracker extends EventTarget {
 
   /**
    * Returns poses in order of distance (as judged by their centroid property)
-   * from the given point.
+   * from the given point. Since centroid is 2D, distance is also calculated using x,y only.
    * 
    * The point should be the same coordinates as poses.
-   * @param guid 
+   * @param point Point to compare to 
    */
   getByDistanceFromPoint(point: Points.Point) {
     const withDistance = [ ...this.#data.values() ].map(pt => {
       return {
-        distance: Points.distance(pt.centroid(), point),
+        distance: Points.distance2d(pt.centroid(), point),
         tracker: pt
       }
     });

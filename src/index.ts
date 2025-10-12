@@ -11,3 +11,4 @@ export * from './client.js';
 export * from './processing.js';
 export * from './processor-modes.js';
 export * from './types-mp.js'
+export * from './util/search-params.js';

@@ -17,11 +17,22 @@ export class ObjectDetector implements IModel {
     this.log = new Log(`ObjectDetector`, this.opts.verbosity);
   }
 
+
   static defaults(): ObjectDetectorOptions {
     return {
       verbosity: `errors`,
       modelPath: 'efficientdet_lite0.tflite',
-      scoreThreshold: 0.5
+      scoreThreshold: 0.5,
+      presetModelPaths: {
+        'lite0-8': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/int8/latest/efficientdet_lite0.tflite`,
+        'lite0-16': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/latest/efficientdet_lite0.tflite`,
+        'lite0-32': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/latest/efficientdet_lite0.tflite`,
+        'lite2-8': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite2/int8/latest/efficientdet_lite2.tflite`,
+        'lite2-16': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite2/float16/latest/efficientdet_lite2.tflite`,
+        'lite2-32': `https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite2/float32/latest/efficientdet_lite2.tflite`,
+        'mobilenet2-8': `https://storage.googleapis.com/mediapipe-models/object_detector/ssd_mobilenet_v2/float16/latest/ssd_mobilenet_v2.tflite`,
+        'mobilenet2-32': `https://storage.googleapis.com/mediapipe-models/object_detector/ssd_mobilenet_v2/float32/latest/ssd_mobilenet_v2.tflite`
+      }
     }
   }
 
@@ -37,10 +48,13 @@ export class ObjectDetector implements IModel {
 
   async init(): Promise<boolean> {
     const p = this.p;
+    const opts = this.opts;
+    const presets = this.opts.presetModelPaths ?? ObjectDetector.defaults().presetModelPaths as Record<string, string>;
+
     const vision = await Mp.FilesetResolver.forVisionTasks(p.wasmBase);
     const mpOpts: Mp.ObjectDetectorOptions = {
       baseOptions: {
-        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath)
+        modelAssetPath: makeModelPath(p.modelsBase, this.opts.modelPath, presets)
       },
       scoreThreshold: 0.5,
       runningMode: `VIDEO`
